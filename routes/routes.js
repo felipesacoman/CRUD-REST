@@ -55,38 +55,19 @@ router.put('/pessoas/:cpf', async (req, res) => {
   }
 });
   
-    const removePontuacaoCpf = (cpf) => {
-        return cpf.replace(/[^\d]/g, ''); // Remove todos os caracteres não numéricos
-    };
-  
-
-    const formatarCpf = (cpf) => {
-        // Adiciona as pontuações no CPF
-        return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
-    };
-  
-  router.delete('/pessoas/:cpf', async (req, res) => {
-    try {
-      let cpf = req.params.cpf;
-      const cpfSemPontuacao = removePontuacaoCpf(cpf); // Remover pontuações do CPF fornecido
-      const pessoa = await Pessoa.findOne({
-        where: {
-          [Op.or]: [
-            { cpf }, // Procurar por CPF com pontuações
-            { cpf: cpfSemPontuacao } // Procurar por CPF sem pontuações
-          ]
-        }
-      });
-      if (!pessoa) {
-        res.status(404).json({ error: 'Pessoa não encontrada.' });
-      } else {
-        await pessoa.destroy();
-        res.json({ message: 'Pessoa excluída com sucesso.' });
-      }
-    } catch (error) {
-      res.status(400).json({ error: error.message });
+router.delete('/pessoas/:cpf', async (req, res) => {
+  try {
+    const pessoa = await Pessoa.findOne({ where: { cpf: req.params.cpf } });
+    if (!pessoa) {
+      res.status(404).json({ error: 'Pessoa não encontrada.' });
+    } else {
+      await pessoa.destroy();
+      res.json({ message: 'Pessoa excluída com sucesso.' });
     }
-  });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 // Obter Pessoa por ID
 router.get('/pessoas/id/:id', async (req, res) => {
